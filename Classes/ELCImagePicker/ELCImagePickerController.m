@@ -25,7 +25,14 @@
     if (self) {
         self.maximumImagesCount = 4;
         [albumPicker setParent:self];
+        //NavBarColor
+        self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:230/255.f green:230/255.f blue:230/255.f alpha:1];
+        //No translucent
+        self.navigationController.navigationBar.translucent = NO;
+        //Light Blue for buttons.
+        self.navigationController.navigationBar.tintColor = [UIColor colorWithRed:33/255.f green:165/255.f blue:184/255.f alpha:1];
     }
+    
     return self;
 }
 

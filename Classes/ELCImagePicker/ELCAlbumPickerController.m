@@ -27,6 +27,7 @@
     [super viewDidLoad];
 	
 	[self.navigationItem setTitle:@"Loading..."];
+    [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
 
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
 	[self.navigationItem setRightBarButtonItem:cancelButton];
@@ -125,6 +126,9 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     
+    [cell.textLabel setFont:[UIFont fontWithName:@"OpenSans" size:13]];
+    cell.textLabel.textColor = [UIColor colorWithRed:51/255.f green:51/255.f blue:51/255.f alpha:1]; //DarkGrey2
+    
     // Get count
     ALAssetsGroup *g = (ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row];
     [g setAssetsFilter:[ALAssetsFilter allAssets]];
@@ -155,7 +159,7 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	return 57;
+	return 70;
 }
 
 @end
