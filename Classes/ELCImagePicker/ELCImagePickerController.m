@@ -84,7 +84,7 @@
 		}
         
         [workingDictionary setObject:obj forKey:UIImagePickerControllerMediaType];
-
+        [workingDictionary setObject:asset forKey:@"asset"];
         //This method returns nil for assets from a shared photo stream that are not yet available locally. If the asset becomes available in the future, an ALAssetsLibraryChangedNotification notification is posted.
         ALAssetRepresentation *assetRep = [asset defaultRepresentation];
 

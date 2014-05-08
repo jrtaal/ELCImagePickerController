@@ -13,7 +13,7 @@
 @interface ELCAssetTablePicker ()
 
 @property (nonatomic, assign) int columns;
-
+@property UIBarButtonItem *doneButtonItem;
 @end
 
 @implementation ELCAssetTablePicker
@@ -42,8 +42,9 @@
     if (self.immediateReturn) {
         
     } else {
-        UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
-        [self.navigationItem setRightBarButtonItem:doneButtonItem];
+        self.doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave target:self action:@selector(doneAction:)];
+        [self.navigationItem setRightBarButtonItem:self.doneButtonItem];
+        self.doneButtonItem.enabled = false;
         [self.navigationItem setTitle:@"Loading..."];
     }
 
@@ -71,7 +72,7 @@
 - (void)preparePhotos
 {
     @autoreleasepool {
-
+        [self.assetGroup setAssetsFilter:[ALAssetsFilter allVideos]];
         [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
             
             if (result == nil) {
@@ -115,7 +116,7 @@
 - (void)doneAction:(id)sender
 {	
 	NSMutableArray *selectedAssetsImages = [[NSMutableArray alloc] init];
-	    
+
 	for (ELCAsset *elcAsset in self.elcAssets) {
 		if ([elcAsset selected]) {
 			[selectedAssetsImages addObject:[elcAsset asset]];
@@ -140,6 +141,7 @@
 
 - (void)assetSelected:(ELCAsset *)asset
 {
+    self.doneButtonItem.enabled = (self.elcAssets.count > 0);
     if (self.singleSelection) {
 
         for (ELCAsset *elcAsset in self.elcAssets) {

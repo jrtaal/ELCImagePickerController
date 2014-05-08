@@ -51,9 +51,12 @@
                 }
                 
                 // added fix for camera albums order
-                NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
-                NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
-                
+              NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
+              NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
+              ALAssetsFilter * filter = [ALAssetsFilter allVideos];
+              [group setAssetsFilter: filter];
+              NSLog(@"Filter %@", filter);
+              
                 if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
                     [self.assetGroups insertObject:group atIndex:0];
                 }
@@ -131,7 +134,9 @@
     
     // Get count
     ALAssetsGroup *g = (ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row];
-    [g setAssetsFilter:[ALAssetsFilter allAssets]];
+    ALAssetsFilter * filter = [ALAssetsFilter allVideos];
+    [g setAssetsFilter: filter];
+
     NSInteger gCount = [g numberOfAssets];
     
     cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[g valueForProperty:ALAssetsGroupPropertyName], (long)gCount];
