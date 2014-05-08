@@ -36,6 +36,13 @@
     return self;
 }
 
+-(id)initImagePickerWithFilter:(ELCAlbumFilter)filter {
+    self = [self initImagePicker];
+    
+    ((ELCAlbumPickerController*) self.viewControllers[0]).filter = filter;
+    return self;
+}
+
 - (id)initWithRootViewController:(UIViewController *)rootViewController
 {
     self = [super initWithRootViewController:rootViewController];

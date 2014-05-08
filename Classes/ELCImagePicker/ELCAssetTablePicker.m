@@ -14,6 +14,7 @@
 
 @property (nonatomic, assign) int columns;
 @property UIBarButtonItem *doneButtonItem;
+@property NSDictionary * assetNames;
 @end
 
 @implementation ELCAssetTablePicker
@@ -27,10 +28,26 @@
         //Sets a reasonable default bigger then 0 for columns
         //So that we don't have a divide by 0 scenario
         self.columns = 4;
+        self.assetNames = @{@(ELCAlbumFilterVideos): @[@"Pick Video", @"Pick Videos"],
+                            @(ELCAlbumFilterAllAssets): @[@"Pick Asset", @"Pick Assets"],
+                            @(ELCAlbumFilterPhotos): @[@"Pick Photo",@"Pick Photos"]
+                            };
     }
     return self;
 }
 
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        self.columns = 4;
+        self.assetNames = @{@(ELCAlbumFilterVideos): @[@"Pick Video", @"Pick Videos"],
+                            @(ELCAlbumFilterAllAssets): @[@"Pick Asset", @"Pick Assets"],
+                            @(ELCAlbumFilterPhotos): @[@"Pick Photo",@"Pick Photos"]
+                            };
+    }
+    return self;
+
+}
 - (void)viewDidLoad
 {
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
@@ -42,7 +59,7 @@
     if (self.immediateReturn) {
         
     } else {
-        self.doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSave target:self action:@selector(doneAction:)];
+        self.doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:self.doneButtonItem];
         self.doneButtonItem.enabled = false;
         [self.navigationItem setTitle:@"Loading..."];
@@ -72,7 +89,15 @@
 - (void)preparePhotos
 {
     @autoreleasepool {
-        [self.assetGroup setAssetsFilter:[ALAssetsFilter allVideos]];
+        switch (self.filter) {
+            case ELCAlbumFilterVideos:
+                [self.assetGroup setAssetsFilter: [ALAssetsFilter allVideos]]; break;
+            case ELCAlbumFilterPhotos:
+                [self.assetGroup setAssetsFilter:[ALAssetsFilter allPhotos]]; break;
+            default:
+                [self.assetGroup setAssetsFilter:[ALAssetsFilter allAssets]]; break;
+        }
+
         [self.assetGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
             
             if (result == nil) {
@@ -107,8 +132,9 @@
                                               atScrollPosition:UITableViewScrollPositionBottom
                                                       animated:NO];
             }
-            
-            [self.navigationItem setTitle:self.singleSelection ? @"Pick Asset" : @"Pick Assets"];
+
+            NSArray * words = self.assetNames[@(self.filter)];
+            [self.navigationItem setTitle:self.singleSelection ? words[0]: words[1]];
         });
     }
 }

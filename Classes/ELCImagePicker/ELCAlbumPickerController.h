@@ -10,6 +10,8 @@
 #import "ELCAssetSelectionDelegate.h"
 #import "ELCAssetPickerFilterDelegate.h"
 
+#import "ELCAsset.h"
+
 @interface ELCAlbumPickerController : UITableViewController <ELCAssetSelectionDelegate>
 
 @property (nonatomic, weak) id<ELCAssetSelectionDelegate> parent;
@@ -17,6 +19,8 @@
 
 // optional, can be used to filter the assets displayed
 @property (nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;
+
+@property ELCAlbumFilter filter;
 
 @end
 

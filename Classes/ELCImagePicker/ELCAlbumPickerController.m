@@ -12,7 +12,6 @@
 @interface ELCAlbumPickerController ()
 
 @property (nonatomic, strong) ALAssetsLibrary *library;
-
 @end
 
 @implementation ELCAlbumPickerController
@@ -46,19 +45,24 @@
         // Group enumerator Block
             void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
             {
-                if (group == nil) {
-                    return;
-                }
-                
-                // added fix for camera albums order
+              if (group == nil) {
+                  return;
+              }
+              
+                  // added fix for camera albums order
               NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
               NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
-              ALAssetsFilter * filter = [ALAssetsFilter allVideos];
-              [group setAssetsFilter: filter];
-              NSLog(@"Filter %@", filter);
-              
-                if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
-                    [self.assetGroups insertObject:group atIndex:0];
+              switch (self.filter) {
+                  case ELCAlbumFilterVideos:
+                      [group setAssetsFilter: [ALAssetsFilter allVideos]]; break;
+                  case ELCAlbumFilterPhotos:
+                      [group setAssetsFilter:[ALAssetsFilter allPhotos]]; break;
+                    default:
+                      [group setAssetsFilter:[ALAssetsFilter allAssets]]; break;
+              }
+
+              if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
+                  [self.assetGroups insertObject:group atIndex:0];
                 }
                 else {
                     [self.assetGroups addObject:group];
@@ -153,6 +157,7 @@
 {
 	ELCAssetTablePicker *picker = [[ELCAssetTablePicker alloc] initWithNibName: nil bundle: nil];
 	picker.parent = self;
+    picker.filter = self.filter;
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
     [picker.assetGroup setAssetsFilter:[ALAssetsFilter allAssets]];

@@ -8,6 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+
+typedef NS_ENUM(NSInteger, ELCAlbumFilter) {
+    ELCAlbumFilterAllAssets = 0,
+    ELCAlbumFilterVideos,
+    ELCAlbumFilterPhotos
+};
+
 @class ELCAsset;
 
 @protocol ELCAssetSelectionDelegate <NSObject>

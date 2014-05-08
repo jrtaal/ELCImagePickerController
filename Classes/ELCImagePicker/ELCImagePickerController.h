@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "ELCAssetSelectionDelegate.h"
+#import <AssetsLibrary/AssetsLibrary.h>
 
 @class ELCImagePickerController;
 @class ELCAlbumPickerController;
@@ -42,6 +43,7 @@
 @property (nonatomic, assign) BOOL returnsOriginalImage;
 
 - (id)initImagePicker;
+- (id)initImagePickerWithFilter: (ELCAlbumFilter) filter;
 - (void)cancelImagePicker;
 
 @end
