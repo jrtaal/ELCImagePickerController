@@ -131,9 +131,11 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+        CGFloat height = cell.frame.size.height;
+        cell.imageView.frame = CGRectMake(0,0,height,height);
     }
     
-    [cell.textLabel setFont:[UIFont fontWithName:@"OpenSans" size:13]];
+    [cell.textLabel setFont:[UIFont systemFontOfSize: 13]];
     cell.textLabel.textColor = [UIColor colorWithRed:51/255.f green:51/255.f blue:51/255.f alpha:1]; //DarkGrey2
     
     // Get count
