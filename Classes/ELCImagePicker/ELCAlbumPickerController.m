@@ -29,7 +29,7 @@
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
 
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
-	[self.navigationItem setRightBarButtonItem:cancelButton];
+    [self.navigationItem setLeftBarButtonItem:cancelButton];
 
     NSMutableArray *tempArray = [[NSMutableArray alloc] init];
 	self.assetGroups = tempArray;
