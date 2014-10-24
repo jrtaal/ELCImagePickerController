@@ -8,6 +8,7 @@
 #import "ELCAlbumPickerController.h"
 #import "ELCImagePickerController.h"
 #import "ELCAssetTablePicker.h"
+#import <MobileCoreServices/UTCoreTypes.h>
 
 @interface ELCAlbumPickerController ()
 
@@ -25,8 +26,7 @@
 {
     [super viewDidLoad];
 	
-	[self.navigationItem setTitle:@"Loading..."];
-    [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+	[self.navigationItem setTitle:NSLocalizedString(@"Loading...", nil)];
 
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.parent action:@selector(cancelImagePicker)];
     [self.navigationItem setLeftBarButtonItem:cancelButton];
@@ -74,10 +74,17 @@
             
             // Group Enumerator Failure Block
             void (^assetGroupEnumberatorFailure)(NSError *) = ^(NSError *error) {
-                NSString * appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-                UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Access denied" message:[NSString stringWithFormat:@"If you want to allow %@ to access your media, please go to iOS Settings > %@ > Photos, and allow access.", appName, appName] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-                [alert show];
-                
+              
+                if ([ALAssetsLibrary authorizationStatus] == ALAuthorizationStatusDenied) {
+                    NSString *errorMessage = NSLocalizedString(@"This app does not have access to your photos or videos. You can enable access in Privacy Settings.", nil);
+                    [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Access Denied", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
+                  
+                } else {
+                    NSString *errorMessage = [NSString stringWithFormat:@"Album Error: %@ - %@", [error localizedDescription], [error localizedRecoverySuggestion]];
+                    [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) message:errorMessage delegate:nil cancelButtonTitle:NSLocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
+                }
+
+                [self.navigationItem setTitle:nil];
                 NSLog(@"A problem occured %@", [error description]);	                                 
             };	
                     
@@ -87,13 +94,25 @@
                                  failureBlock:assetGroupEnumberatorFailure];
         
         }
-    });    
+    });
+    
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadTableView) name:ALAssetsLibraryChangedNotification object:nil];
+    [self.tableView reloadData];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:ALAssetsLibraryChangedNotification object:nil];
 }
 
 - (void)reloadTableView
 {
 	[self.tableView reloadData];
-	[self.navigationItem setTitle:@"Select an Album"];
+	[self.navigationItem setTitle:NSLocalizedString(@"Select an Album", nil)];
 }
 
 - (BOOL)shouldSelectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount
@@ -101,9 +120,30 @@
     return [self.parent shouldSelectAsset:asset previousCount:previousCount];
 }
 
+- (BOOL)shouldDeselectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount
+{
+    return [self.parent shouldDeselectAsset:asset previousCount:previousCount];
+}
+
 - (void)selectedAssets:(NSArray*)assets
 {
 	[_parent selectedAssets:assets];
+}
+
+- (ALAssetsFilter *)assetFilter
+{
+    if([self.mediaTypes containsObject:(NSString *)kUTTypeImage] && [self.mediaTypes containsObject:(NSString *)kUTTypeMovie])
+    {
+        return [ALAssetsFilter allAssets];
+    }
+    else if([self.mediaTypes containsObject:(NSString *)kUTTypeMovie])
+    {
+        return [ALAssetsFilter allVideos];
+    }
+    else
+    {
+        return [ALAssetsFilter allPhotos];
+    }
 }
 
 #pragma mark -
@@ -140,13 +180,11 @@
     
     // Get count
     ALAssetsGroup *g = (ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row];
-    ALAssetsFilter * filter = [ALAssetsFilter allVideos];
-    [g setAssetsFilter: filter];
-
+    [g setAssetsFilter:[self assetFilter]];
     NSInteger gCount = [g numberOfAssets];
     
     cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[g valueForProperty:ALAssetsGroupPropertyName], (long)gCount];
-    [cell.imageView setImage:[UIImage imageWithCGImage:[(ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row] posterImage]]];
+    [cell.imageView setImage:[UIImage imageWithCGImage:[g posterImage]]];
 	[cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
 	
     return cell;
@@ -162,7 +200,7 @@
     picker.filter = self.filter;
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
-    [picker.assetGroup setAssetsFilter:[ALAssetsFilter allAssets]];
+    [picker.assetGroup setAssetsFilter:[self assetFilter]];
     
 	picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
 	

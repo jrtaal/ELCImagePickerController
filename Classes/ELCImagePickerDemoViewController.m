@@ -8,9 +8,8 @@
 
 #import "ELCImagePickerDemoAppDelegate.h"
 #import "ELCImagePickerDemoViewController.h"
-#import "ELCImagePickerController.h"
-#import "ELCAlbumPickerController.h"
-#import "ELCAssetTablePicker.h"
+#import <MobileCoreServices/UTCoreTypes.h>
+
 
 @interface ELCImagePickerDemoViewController ()
 
@@ -24,9 +23,14 @@
 
 - (IBAction)launchController
 {
-	ELCImagePickerController *elcPicker = [[ELCImagePickerController alloc] initImagePickerWithFilter:ELCAlbumFilterAllAssets];
-    elcPicker.maximumImagesCount = 4;
-    elcPicker.returnsOriginalImage = NO; //Only return the fullScreenImage, not the fullResolutionImage
+	ELCImagePickerController *elcPicker = [[ELCImagePickerController alloc] initImagePicker];
+
+    elcPicker.maximumImagesCount = 100; //Set the maximum number of images to select to 100
+    elcPicker.returnsOriginalImage = YES; //Only return the fullScreenImage, not the fullResolutionImage
+    elcPicker.returnsImage = YES; //Return UIimage if YES. If NO, only return asset location information
+    elcPicker.onOrder = YES; //For multiple image selection, display and return order of selected images
+    elcPicker.mediaTypes = @[(NSString *)kUTTypeImage, (NSString *)kUTTypeMovie]; //Supports image and movie types
+
 	elcPicker.imagePickerDelegate = self;
     
     [self presentViewController:elcPicker animated:YES completion:nil];
@@ -64,7 +68,9 @@
 	ELCImagePickerController *elcPicker = [[ELCImagePickerController alloc] initWithRootViewController:tablePicker];
     elcPicker.maximumImagesCount = 1;
     elcPicker.imagePickerDelegate = self;
-    elcPicker.returnsOriginalImage = NO; //Only return the fullScreenImage, not the fullResolutionImage
+    elcPicker.returnsOriginalImage = YES; //Only return the fullScreenImage, not the fullResolutionImage
+    elcPicker.returnsImage = YES; //Return UIimage if YES. If NO, only return asset location information
+    elcPicker.onOrder = NO; //For single image selection, do not display and return order of selected images
 	tablePicker.parent = elcPicker;
     
     // Move me
@@ -97,20 +103,42 @@
 	workingFrame.origin.x = 0;
     
     NSMutableArray *images = [NSMutableArray arrayWithCapacity:[info count]];
-	
 	for (NSDictionary *dict in info) {
-	
-        UIImage *image = [dict objectForKey:UIImagePickerControllerOriginalImage];
-        [images addObject:image];
-        
-		UIImageView *imageview = [[UIImageView alloc] initWithImage:image];
-		[imageview setContentMode:UIViewContentModeScaleAspectFit];
-		imageview.frame = workingFrame;
-		
-		[_scrollView addSubview:imageview];
-		
-		workingFrame.origin.x = workingFrame.origin.x + workingFrame.size.width;
-	}
+        if ([dict objectForKey:UIImagePickerControllerMediaType] == ALAssetTypePhoto){
+            if ([dict objectForKey:UIImagePickerControllerOriginalImage]){
+                UIImage* image=[dict objectForKey:UIImagePickerControllerOriginalImage];
+                [images addObject:image];
+                
+                UIImageView *imageview = [[UIImageView alloc] initWithImage:image];
+                [imageview setContentMode:UIViewContentModeScaleAspectFit];
+                imageview.frame = workingFrame;
+                
+                [_scrollView addSubview:imageview];
+                
+                workingFrame.origin.x = workingFrame.origin.x + workingFrame.size.width;
+            } else {
+                NSLog(@"UIImagePickerControllerReferenceURL = %@", dict);
+            }
+        } else if ([dict objectForKey:UIImagePickerControllerMediaType] == ALAssetTypeVideo){
+            if ([dict objectForKey:UIImagePickerControllerOriginalImage]){
+                UIImage* image=[dict objectForKey:UIImagePickerControllerOriginalImage];
+
+                [images addObject:image];
+                
+                UIImageView *imageview = [[UIImageView alloc] initWithImage:image];
+                [imageview setContentMode:UIViewContentModeScaleAspectFit];
+                imageview.frame = workingFrame;
+                
+                [_scrollView addSubview:imageview];
+                
+                workingFrame.origin.x = workingFrame.origin.x + workingFrame.size.width;
+            } else {
+                NSLog(@"UIImagePickerControllerReferenceURL = %@", dict);
+            }
+        } else {
+            NSLog(@"Uknown asset type");
+        }
+    }
     
     self.chosenImages = images;
 	

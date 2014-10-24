@@ -12,6 +12,8 @@
 #import "ELCAssetTablePicker.h"
 #import "ELCAlbumPickerController.h"
 #import <CoreLocation/CoreLocation.h>
+#import <MobileCoreServices/UTCoreTypes.h>
+#import "ELCConsole.h"
 
 @implementation ELCImagePickerController
 
@@ -24,7 +26,10 @@
     self = [super initWithRootViewController:albumPicker];
     if (self) {
         self.maximumImagesCount = 4;
+        self.returnsImage = YES;
+        self.returnsOriginalImage = YES;
         [albumPicker setParent:self];
+        self.mediaTypes = @[(NSString *)kUTTypeImage, (NSString *)kUTTypeMovie];
         //NavBarColor
         self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:230/255.f green:230/255.f blue:230/255.f alpha:1];
         //No translucent
@@ -45,11 +50,28 @@
 
 - (id)initWithRootViewController:(UIViewController *)rootViewController
 {
+
     self = [super initWithRootViewController:rootViewController];
     if (self) {
         self.maximumImagesCount = 4;
+        self.returnsImage = YES;
     }
     return self;
+}
+
+- (ELCAlbumPickerController *)albumPicker
+{
+    return self.viewControllers[0];
+}
+
+- (void)setMediaTypes:(NSArray *)mediaTypes
+{
+    self.albumPicker.mediaTypes = mediaTypes;
+}
+
+- (NSArray *)mediaTypes
+{
+    return self.albumPicker.mediaTypes;
 }
 
 - (void)cancelImagePicker
@@ -74,11 +96,17 @@
     return shouldSelect;
 }
 
+- (BOOL)shouldDeselectAsset:(ELCAsset *)asset previousCount:(NSUInteger)previousCount;
+{
+    return YES;
+}
+
 - (void)selectedAssets:(NSArray *)assets
 {
 	NSMutableArray *returnArray = [[NSMutableArray alloc] init];
 	
-	for(ALAsset *asset in assets) {
+	for(ELCAsset *elcasset in assets) {
+        ALAsset *asset = elcasset.asset;
 		id obj = [asset valueForProperty:ALAssetPropertyType];
 		if (!obj) {
 			continue;
@@ -96,21 +124,24 @@
         ALAssetRepresentation *assetRep = [asset defaultRepresentation];
 
         if(assetRep != nil) {
-            CGImageRef imgRef = nil;
-            //defaultRepresentation returns image as it appears in photo picker, rotated and sized,
-            //so use UIImageOrientationUp when creating our image below.
-            UIImageOrientation orientation = UIImageOrientationUp;
+            if (_returnsImage) {
+                CGImageRef imgRef = nil;
+                //defaultRepresentation returns image as it appears in photo picker, rotated and sized,
+                //so use UIImageOrientationUp when creating our image below.
+                UIImageOrientation orientation = UIImageOrientationUp;
             
-            if (_returnsOriginalImage) {
-                imgRef = [assetRep fullResolutionImage];
-                orientation = [assetRep orientation];
-            } else {
-                imgRef = [assetRep fullScreenImage];
+                if (_returnsOriginalImage) {
+                    imgRef = [assetRep fullResolutionImage];
+                    orientation = [assetRep orientation];
+                } else {
+                    imgRef = [assetRep fullScreenImage];
+                }
+                UIImage *img = [UIImage imageWithCGImage:imgRef
+                                                   scale:1.0f
+                                             orientation:orientation];
+                [workingDictionary setObject:img forKey:UIImagePickerControllerOriginalImage];
             }
-            UIImage *img = [UIImage imageWithCGImage:imgRef
-                                               scale:1.0f
-                                         orientation:orientation];
-            [workingDictionary setObject:img forKey:UIImagePickerControllerOriginalImage];
+
             [workingDictionary setObject:[[asset valueForProperty:ALAssetPropertyURLs] valueForKey:[[[asset valueForProperty:ALAssetPropertyURLs] allKeys] objectAtIndex:0]] forKey:UIImagePickerControllerReferenceURL];
             
             [returnArray addObject:workingDictionary];
@@ -131,6 +162,16 @@
     } else {
         return toInterfaceOrientation != UIInterfaceOrientationPortraitUpsideDown;
     }
+}
+
+- (BOOL)onOrder
+{
+    return [[ELCConsole mainConsole] onOrder];
+}
+
+- (void)setOnOrder:(BOOL)onOrder
+{
+    [[ELCConsole mainConsole] setOnOrder:onOrder];
 }
 
 @end
