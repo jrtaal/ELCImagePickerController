@@ -21,7 +21,5 @@
 // optional, can be used to filter the assets displayed
 @property (nonatomic, weak) id<ELCAssetPickerFilterDelegate> assetPickerFilterDelegate;
 
-@property ELCAlbumFilter filter;
-
 @end
 

@@ -23,7 +23,7 @@
 
 - (IBAction)launchController
 {
-	ELCImagePickerController *elcPicker = [[ELCImagePickerController alloc] initImagePicker];
+    ELCImagePickerController *elcPicker = [[ELCImagePickerController alloc] initImagePicker];
 
     elcPicker.maximumImagesCount = 100; //Set the maximum number of images to select to 100
     elcPicker.returnsOriginalImage = YES; //Only return the fullScreenImage, not the fullResolutionImage

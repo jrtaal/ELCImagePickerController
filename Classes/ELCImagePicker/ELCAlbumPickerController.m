@@ -45,23 +45,15 @@
         // Group enumerator Block
             void (^assetGroupEnumerator)(ALAssetsGroup *, BOOL *) = ^(ALAssetsGroup *group, BOOL *stop) 
             {
-              if (group == nil) {
-                  return;
-              }
+                if (group == nil) {
+                    return;
+                }
               
-                  // added fix for camera albums order
-              NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
-              NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
-              switch (self.filter) {
-                  case ELCAlbumFilterVideos:
-                      [group setAssetsFilter: [ALAssetsFilter allVideos]]; break;
-                  case ELCAlbumFilterPhotos:
-                      [group setAssetsFilter:[ALAssetsFilter allPhotos]]; break;
-                    default:
-                      [group setAssetsFilter:[ALAssetsFilter allAssets]]; break;
-              }
+                // added fix for camera albums order
+                NSString *sGroupPropertyName = (NSString *)[group valueForProperty:ALAssetsGroupPropertyName];
+                NSUInteger nType = [[group valueForProperty:ALAssetsGroupPropertyType] intValue];
 
-              if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
+                if ([[sGroupPropertyName lowercaseString] isEqualToString:@"camera roll"] && nType == ALAssetsGroupSavedPhotos) {
                   [self.assetGroups insertObject:group atIndex:0];
                 }
                 else {
@@ -180,7 +172,7 @@
     
     // Get count
     ALAssetsGroup *g = (ALAssetsGroup*)[self.assetGroups objectAtIndex:indexPath.row];
-    [g setAssetsFilter:[self assetFilter]];
+    [g setAssetsFilter: [self assetFilter] ];
     NSInteger gCount = [g numberOfAssets];
     
     cell.textLabel.text = [NSString stringWithFormat:@"%@ (%ld)",[g valueForProperty:ALAssetsGroupPropertyName], (long)gCount];
@@ -197,15 +189,26 @@
 {
 	ELCAssetTablePicker *picker = [[ELCAssetTablePicker alloc] initWithNibName: nil bundle: nil];
 	picker.parent = self;
-    picker.filter = self.filter;
 
     picker.assetGroup = [self.assetGroups objectAtIndex:indexPath.row];
     [picker.assetGroup setAssetsFilter:[self assetFilter]];
     
 	picker.assetPickerFilterDelegate = self.assetPickerFilterDelegate;
-	
-	[self.navigationController pushViewController:picker animated:YES];
+
+    NSDictionary * assetNames = @{(NSString*)kUTTypeMovie: @[@"Pick Video", @"Pick Videos"],
+                                  @"any": @[@"Pick Asset", @"Pick Assets"],
+                                  (NSString*)kUTTypeImage: @[@"Pick Photo",@"Pick Photos"]
+                                  };
+    NSArray * words;
+    if (self.mediaTypes.count==1)
+        words = assetNames[self.mediaTypes[0]];
+    else
+        words = assetNames[@"any"];
+    [picker.navigationItem setTitle:picker.singleSelection ? NSLocalizedString(words[0],nil): NSLocalizedString(words[1],nil)];
+
+    [self.navigationController pushViewController:picker animated:YES];
 }
+
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {

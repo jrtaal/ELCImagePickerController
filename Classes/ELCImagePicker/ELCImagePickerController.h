@@ -56,7 +56,6 @@
 @property (nonatomic, assign) BOOL returnsOriginalImage;
 
 - (id)initImagePicker;
-- (id)initImagePickerWithFilter: (ELCAlbumFilter) filter;
 - (void)cancelImagePicker;
 
 @end

@@ -29,10 +29,6 @@
         //Sets a reasonable default bigger then 0 for columns
         //So that we don't have a divide by 0 scenario
         self.columns = 4;
-        self.assetNames = @{@(ELCAlbumFilterVideos): @[@"Pick Video", @"Pick Videos"],
-                            @(ELCAlbumFilterAllAssets): @[@"Pick Asset", @"Pick Assets"],
-                            @(ELCAlbumFilterPhotos): @[@"Pick Photo",@"Pick Photos"]
-                            };
     }
     return self;
 }
@@ -41,10 +37,6 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         self.columns = 4;
-        self.assetNames = @{@(ELCAlbumFilterVideos): @[@"Pick Video", @"Pick Videos"],
-                            @(ELCAlbumFilterAllAssets): @[@"Pick Asset", @"Pick Assets"],
-                            @(ELCAlbumFilterPhotos): @[@"Pick Photo",@"Pick Photos"]
-                            };
     }
     return self;
 
@@ -63,7 +55,7 @@
         self.doneButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneAction:)];
         [self.navigationItem setRightBarButtonItem:self.doneButtonItem];
         self.doneButtonItem.enabled = false;
-        [self.navigationItem setTitle:@"Loading..."];
+            //[self.navigationItem setTitle:NSLocalizedString(@"Loading...","")];
     }
 
 	[self performSelectorInBackground:@selector(preparePhotos) withObject:nil];
@@ -136,8 +128,6 @@
                                               atScrollPosition:UITableViewScrollPositionBottom
                                                       animated:NO];
             }
-            
-            [self.navigationItem setTitle:self.singleSelection ? NSLocalizedString(@"Pick Photo", nil) : NSLocalizedString(@"Pick Photos", nil)];
         });
     }
 }
