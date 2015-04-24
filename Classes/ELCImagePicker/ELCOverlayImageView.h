@@ -10,7 +10,9 @@
 
 @interface ELCOverlayImageView : UIImageView
 
+@property (nonatomic, strong) UIImageView * subimgView;
 @property (nonatomic, strong) UILabel *labIndex;
+@property (nonatomic, strong) UILabel *durationLabel;
 
 - (void)setIndex:(int)_index;
 

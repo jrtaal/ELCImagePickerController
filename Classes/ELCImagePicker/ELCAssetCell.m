@@ -15,7 +15,6 @@
 @property (nonatomic, strong) NSArray *rowAssets;
 @property (nonatomic, strong) NSMutableArray *imageViewArray;
 @property (nonatomic, strong) NSMutableArray *overlayViewArray;
-
 @end
 
 @implementation ELCAssetCell
@@ -34,7 +33,7 @@
         
         NSMutableArray *overlayArray = [[NSMutableArray alloc] initWithCapacity:4];
         self.overlayViewArray = overlayArray;
-        
+
         self.alignmentLeft = YES;
 	}
 	return self;
@@ -63,19 +62,23 @@
             [_imageViewArray addObject:imageView];
         }
         
+	ELCOverlayImageView *overlayView;
         if (i < [_overlayViewArray count]) {
-            ELCOverlayImageView *overlayView = [_overlayViewArray objectAtIndex:i];
-            overlayView.hidden = asset.selected ? NO : YES;
-            overlayView.labIndex.text = [NSString stringWithFormat:@"%d", asset.index + 1];
+            overlayView = [_overlayViewArray objectAtIndex:i];
         } else {
             if (overlayImage == nil) {
                 overlayImage = [UIImage imageNamed:@"Overlay.png"];
             }
-            ELCOverlayImageView *overlayView = [[ELCOverlayImageView alloc] initWithImage:overlayImage];
+            overlayView = [[ELCOverlayImageView alloc] initWithImage:overlayImage];
             [_overlayViewArray addObject:overlayView];
-            overlayView.hidden = asset.selected ? NO : YES;
-            overlayView.labIndex.text = [NSString stringWithFormat:@"%d", asset.index + 1];
         }
+	
+        overlayView.subimgView.hidden = !asset.selected;
+
+        overlayView.durationLabel.hidden = asset.selected;
+        overlayView.labIndex.text = [NSString stringWithFormat:@"%d", asset.index + 1];
+        double duration = [[asset.asset valueForProperty:ALAssetPropertyDuration] doubleValue];
+        overlayView.durationLabel.text = [NSString stringWithFormat:@"%5.0f sec.", duration];
     }
 }
 
@@ -99,7 +102,8 @@
             ELCAsset *asset = [_rowAssets objectAtIndex:i];
             asset.selected = !asset.selected;
             ELCOverlayImageView *overlayView = [_overlayViewArray objectAtIndex:i];
-            overlayView.hidden = !asset.selected;
+            overlayView.subimgView.hidden = !asset.selected;
+            overlayView.durationLabel.hidden = asset.selected;
             if (asset.selected) {
                 asset.index = [[ELCConsole mainConsole] numOfSelectedElements];
                 [overlayView setIndex:asset.index+1];

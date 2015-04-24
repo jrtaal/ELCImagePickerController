@@ -34,6 +34,7 @@
     self = [super init];
     if (self) {
         UIImageView *img = [[UIImageView alloc] initWithImage:image];
+        self.subimgView = img;
         [self addSubview:img];
         
         if ([[ELCConsole mainConsole] onOrder]) {
@@ -49,6 +50,13 @@
             self.labIndex.font = [UIFont boldSystemFontOfSize:13];
             [self addSubview:self.labIndex];
         }
+	    self.durationLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 50, 72, 16)];
+
+        self.durationLabel.clipsToBounds = YES;
+        self.durationLabel.textAlignment = NSTextAlignmentCenter;
+        self.durationLabel.textColor = [UIColor whiteColor];
+        self.durationLabel.font = [UIFont systemFontOfSize:12];
+        [self addSubview:self.durationLabel];
     }
     return self;
 }
