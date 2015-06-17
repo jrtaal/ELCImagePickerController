@@ -116,7 +116,7 @@
 
          }];
 
-        dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
             // scroll to bottom
             long section = [self numberOfSectionsInTableView:self.tableView] - 1;
@@ -249,8 +249,8 @@
 
 - (NSArray *)assetsForIndexPath:(NSIndexPath *)path
 {
-    long index = path.row * self.columns;
-    long length = MIN(self.columns, [self.elcAssets count] - index);
+    long index = MIN(MAX(0, path.row * self.columns), self.elcAssets.count-1);
+    long length = MAX(0,MIN(self.columns, [self.elcAssets count] - index));
     return [self.elcAssets subarrayWithRange:NSMakeRange(index, length)];
 }
 
